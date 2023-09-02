@@ -1,11 +1,11 @@
-DROP DATABASE IF EXIST employees_db;
-CREATE DATABASE employees_db;
+DROP DATABASE IF EXIST company_db;
+CREATE DATABASE company_db;
 
-USE employees_db;
+USE company_db;
 
 CREATE TABLE department (
     id INT AUTO INCREMENT NOT NULL,
-    department VARCHAR(30) NOT NULL
+    dep_name VARCHAR(30) NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -16,6 +16,7 @@ CREATE TABLE role (
     department_id INT
     FOREIGN KEY (department_id)
     REFERENCES department(id)
+    PRIMARY KEY (id)
     ON DELETE SET NULL
 );
 

@@ -5,3 +5,18 @@ const mysql = require('mysql2');
 const inquirer = require('inquirer');
 
 
+// Create a function to initialize/CLI app
+function init() {
+    inquirer
+    // Filter through questions
+    .prompt(options)
+    .then((options) => {
+        // Store the new README content with user content
+        const readmeFileContent = generateMarkdown(answers);
+    })
+    .catch;
+}
+
+
+// Function call to initialize app
+init();

@@ -16,7 +16,6 @@ const db = mysql.createConnection(
       password: password,
       database: 'company_db'
     },
-    console.log(`Connected to the company_db database.`)
 );
 
 // Connect to the database
@@ -49,6 +48,7 @@ const options = [
     ],
   },
 ];
+
 
 
 // Initialize the CLI application

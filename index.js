@@ -74,6 +74,7 @@ function init() {
           break;
         case 'Add a role':
           // Call function to add a role
+          addRole();
           break;
         case 'Add an employee':
           // Call function to add an employee
@@ -135,7 +136,7 @@ function addDepartment() {
           if (err) {
             console.error('Error:', err);
           } else {
-            console.log([answers.departmentName], ' department added successfully.');
+            console.log(`${answers.departmentName} department added successfully.`);
           }
 
           // Ask if the user wants to add another department
@@ -150,6 +151,66 @@ function addDepartment() {
             .then((confirm) => {
               // If Yes to add another department> call addDepartment, else> return to main menu
               (confirm.addAnother) ? addDepartment() : init();
+            })
+            .catch((err) => {
+              // Handle prompt-related errors here
+              console.error('Error:', err);
+            });
+        }
+      );
+    })
+    .catch((err) => {
+      // Handle errors related to the entire function here
+      console.error('Error:', err);
+    });
+}
+
+// Define a function to add a department
+function addRole() {
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'depName',
+        message: 'Choose the department to enter role:',
+        choices: [{ name: 'Sales', value: 1 }, { name: 'Legal', value: 2 }, { name: 'Finance', value: 3 }, { name: 'Engineering', value: 4 }],
+      },
+      {
+        type: 'input',
+        name: 'title',
+        message: 'Enter the name of the role:',
+      },
+      {
+        type: 'input',
+        name: 'salary',
+        message: 'Enter the name of the salary:',
+      },
+    ])
+    .then((answers) => {
+      // Insert the new role into the database
+      db.query(
+        'INSERT INTO role (department_id, title, salary) VALUES (?,?,?)',
+        [answers.depName, answers.title, answers.salary],
+        function (err, results) {
+          if (err) {
+            console.error('Error:', err);
+          } else {
+            console.log(`${answers.title}added successfully.`);
+          }
+
+          // Ask if the user wants to add another role
+          inquirer
+            .prompt([
+              {
+                type: 'confirm',
+                name: 'addAnother',
+                message: 'Would you like to add another role?',
+              },
+            ])
+            .then((confirmation) => {
+              // If the user wants to add another role call addRole
+              // If not, return to the main menu
+              (confirmation.addAnother) ? addRole() : init();
             })
             .catch((err) => {
               // Handle prompt-related errors here

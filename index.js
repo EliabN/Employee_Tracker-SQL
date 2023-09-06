@@ -61,7 +61,7 @@ function init() {
           break;
         case 'Add a department':
           // Call function to add a department
-          viewAllDepartments();
+          addDepartment();
           return;
         case 'View all roles':
           // Call function to view all roles
@@ -135,7 +135,7 @@ function addDepartment() {
           if (err) {
             console.error('Error:', err);
           } else {
-            console.log([answers.departmentName], ' added successfully.');
+            console.log([answers.departmentName], ' department added successfully.');
           }
 
           // Ask if the user wants to add another department
@@ -148,21 +148,18 @@ function addDepartment() {
               },
             ])
             .then((confirm) => {
-              if (confirm.addAnother) {
-                // If the user wants to add another department, recursively call addDepartment
-                addDepartment();
-              } else {
-                // If not, return to the main menu
-                init();
-              }
+              // If Yes to add another department> call addDepartment, else> return to main menu
+              (confirm.addAnother) ? addDepartment() : init();
             })
             .catch((err) => {
+              // Handle prompt-related errors here
               console.error('Error:', err);
             });
         }
       );
     })
     .catch((err) => {
+      // Handle errors related to the entire function here
       console.error('Error:', err);
     });
 }

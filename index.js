@@ -56,29 +56,29 @@ function init() {
     .then((answers) => {
       switch (answers.main) {
         case 'View all departments':
-          viewAllDepartments()
+          // Call function to view all departments
+          viewAllDepartments();
           break;
-        // Add a department
         case 'Add a department':
+          // Call function to add a department
           return;
-        // Call function to view all roles
         case 'View all roles':
+          // Call function to view all roles
           break;
-        // Call function to view all employees
         case 'View all employees':
+          // Call function to view all employees
           break;
-        // Call function to add a department
         case 'Add a department':
+          // Call function to add a department
           break;
-        // Call function to add a role
         case 'Add a role':
+          // Call function to add a role
           break;
-        // Call function to add an employee
         case 'Add an employee':
+          // Call function to add an employee
           break;
-        // Call function to update an employee role
         case 'Update an employee role':
-
+          // Call function to update an employee role
           break;
         case 'Exit':
           console.log('Exiting the application.');
@@ -100,9 +100,6 @@ function init() {
 
 
 
-
-
-
 // Function to view all departments
 function viewAllDepartments() {
   console.log()
@@ -115,5 +112,6 @@ function viewAllDepartments() {
   });
   fun();
 }
+
 
 

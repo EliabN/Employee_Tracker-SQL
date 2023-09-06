@@ -61,6 +61,7 @@ function init() {
           break;
         case 'Add a department':
           // Call function to add a department
+          viewAllDepartments();
           return;
         case 'View all roles':
           // Call function to view all roles
@@ -107,11 +108,63 @@ function viewAllDepartments() {
     if (err) {
       console.error('Error:', err);
     } else {
-      console.log(results);
+      console.table(results);
     }
   });
-  fun();
+  init();
 }
 
+
+
+// Define a function to add a department
+function addDepartment() {
+  inquirer
+    .prompt([
+      {
+        type: 'input',
+        name: 'departmentName',
+        message: 'Enter the name of the department:',
+      },
+    ])
+    .then((answers) => {
+      // Insert the new department into the database
+      db.query(
+        'INSERT INTO department (dep_name) VALUES (?)',
+        [answers.departmentName],
+        function (err, results) {
+          if (err) {
+            console.error('Error:', err);
+          } else {
+            console.log([answers.departmentName], ' added successfully.');
+          }
+
+          // Ask if the user wants to add another department
+          inquirer
+            .prompt([
+              {
+                type: 'confirm',
+                name: 'addAnother',
+                message: 'Would you like to add another department?',
+              },
+            ])
+            .then((confirm) => {
+              if (confirm.addAnother) {
+                // If the user wants to add another department, recursively call addDepartment
+                addDepartment();
+              } else {
+                // If not, return to the main menu
+                init();
+              }
+            })
+            .catch((err) => {
+              console.error('Error:', err);
+            });
+        }
+      );
+    })
+    .catch((err) => {
+      console.error('Error:', err);
+    });
+}
 
 

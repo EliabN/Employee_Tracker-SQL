@@ -23,7 +23,7 @@ SO THAT I can organize and plan my business
 
 The `click` following video to see the application being used from the command line:
 
-[![A video thumbnail shows the command-line employee management application with a play button overlaying the view.](./Assets/12-sql-video-thumbnail.png)](https://2u-20.wistia.com/medias/2lnle7xnpk)
+[![A video thumbnail shows the command-line employee management application with a play button overlaying the view.](./Assets/12-sql-video-thumbnail.png)](https://watch.screencastify.com/v/Iimzyd2sjWXuwYm78w8t)
 
 ## Important 
 

@@ -1,7 +1,7 @@
 // Import and require mysql2
 const mysql = require('mysql2');
 // Import password for mysql2
-const password = require('./sqlPassword');
+const { password, aSCII } = require('./sqlPassword');
 // Import and require inquirer (inquirer@8.2.4)
 const inquirer = require('inquirer');
 
@@ -24,7 +24,9 @@ db.connect(function (err) {
     console.error('Error connecting to the database:', err);
     process.exit(1);
   }
-  console.log('Connected to the company_db database.\n');
+  // Imported mySQL password ASCII art
+  console.log(aSCII);
+  console.log('\n\nConnected to the company_db database.\n');
   // Start the CLI application
   init();
 });
@@ -118,7 +120,7 @@ function viewAllDepartments() {
 // Function to view all roles
 function viewAllRoles() {
   console.log()
-  db.query('SELECT * FROM role', function (err, results) {
+  db.query('SELECT * FROM role JOIN department ON role.department_id = department.id;', function (err, results) {
     if (err) {
       console.error('Error:', err);
     } else {
@@ -131,7 +133,7 @@ function viewAllRoles() {
 // Function to view all employee
 function viewAllEmployee() {
   console.log()
-  db.query('SELECT * FROM employee', function (err, results) {
+  db.query('SELECT * FROM employee JOIN role ON employee.role_id = role.id;', function (err, results) {
     if (err) {
       console.error('Error:', err);
     } else {
@@ -162,7 +164,7 @@ function addDepartment() {
           if (err) {
             console.error('Error:', err);
           } else {
-            console.log(`>${answers.departmentName}< department added successfully.`);
+            console.log(`> ${answers.departmentName} < department added successfully.`);
           }
           promptToAddAnother();
         }
@@ -225,7 +227,7 @@ function addRole() {
           if (err) {
             console.error('Error:', err);
           } else {
-            console.log(`>${answers.title}< added successfully.`);
+            console.log(`> ${answers.title} < added successfully.`);
           }
 
           // Ask if the user wants to add another role
@@ -254,6 +256,73 @@ function addRole() {
       console.error('Error:', err);
     });
 }
+
+// A function to add a employee
+function addEmployee() {
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'roleID',
+        message: 'Choose the role of the employee',
+        choices: [{ name: 'Sales Lead', value: 1 }, { name: 'Salesperson', value: 2 }, { name: 'Lead Engineer', value: 3 }, { name: 'Software Engineer', value: 4 }, { name: 'Account Manager', value: 5 }, { name: 'Accountant', value: 6 }, { name: 'Legal Team Lead', value: 7 }, { name: 'Lawyer', value: 8 }],
+      },
+      {
+        type: 'input',
+        name: 'firstName',
+        message: 'Enter the first name of the employee:',
+      },
+      {
+        type: 'input',
+        name: 'lastName',
+        message: 'Enter the last name of the employee:',
+      },
+      {
+        type: 'list',
+        name: 'managerID',
+        message: 'Choose the manager of the rol/employee',
+        choices: [{ name: 'John Doe', value: 1 }, { name: 'Mike Chan', value: 2 }, { name: 'Ashley Rodriguez', value: 3 }, { name: 'Kevin Tupik', value: 4 }, { name: 'Kunal Singh', value: 5 }, { name: 'Malia Brown', value: 6 }, { name: 'Sarah Lourd', value: 7 }, { name: 'Tom Allen', value: 8 }],
+      }
+    ])
+    .then((answers) => {
+      // Insert the new employee into the database
+      db.query(
+        'INSERT INTO employee (role_id, first_name, last_name, manager_id) VALUES (?,?,?,?)',
+        [answers.roleID, answers.firstName, answers.lastName, answers.managerID],
+        function (err, results) {
+          if (err) {
+            console.error('Error:', err);
+          } else {
+            console.log(`> ${answers.firstName}, ${answers.lastName} < added successfully.`);
+          }
+
+          // Ask if the user wants to add another employee
+          inquirer
+            .prompt([
+              {
+                type: 'confirm',
+                name: 'addAnother',
+                message: 'Would you like to add another employee?',
+              },
+            ])
+            .then((confirmation) => {
+              // If the user wants to add another role call addEmployee
+              // If not, return to the main menu
+              (confirmation.addAnother) ? addEmployee() : init();
+            })
+            .catch((err) => {
+              // Handle prompt-related errors here
+              console.error('Error:', err);
+            });
+        }
+      );
+    })
+    .catch((err) => {
+      // Handle errors related to the entire function here
+      console.error('Error:', err);
+    });
+}
+
 
 // A function to add a employee
 function addEmployee() {
@@ -340,24 +409,59 @@ function updateEmployeeRole() {
       }
     ])
     .then((answers) => {
-      // Insert the new department into the database
-      db.query(
-        'UPDATE employee SET `role_id` = ? WHERE `id` = ?',
-        [answers.roleID, answers.employeeID],
-        function (err, results) {
-          if (err) {
-            console.error('Error:', err);
-          } else {
-            console.log(`Employee >${answers.}< updated successfully.`);
+      const employeeName = getEmployeeNameById(answers.employeeID);
+
+      if (employeeName) {
+        // Update the employee's role in the database
+        db.query(
+          'UPDATE employee SET `role_id` = ? WHERE `id` = ?',
+          [answers.roleID, answers.employeeID],
+          function (err, results) {
+            if (err) {
+              console.error('Error:', err);
+            } else {
+              console.log(`Employee ${employeeName}'s role updated successfully.`);
+            }
+            init();
           }
-          init()
-        }
-      );
+        );
+      } else {
+        console.error('Invalid employee ID.');
+        init();
+      }
     })
     .catch((err) => {
       // Handle errors related to the entire function here
       console.error('Error:', err);
     });
 }
+
+
+
+function getEmployeeNameById(employeeId) {
+  // Define a mapping of employee IDs to names
+  const employeeIdToName = {
+    1: 'John Doe',
+    2: 'Mike Chan',
+    3: 'Ashley Rodriguez',
+    4: 'Kevin Tupik',
+    5: 'Kunal Singh',
+    6: 'Malia Brown',
+    7: 'Sarah Lourd',
+    8: 'Tom Allen',
+  };
+
+  // Check if the provided employeeId exists in the mapping
+  if (employeeIdToName.hasOwnProperty(employeeId)) {
+    return employeeIdToName[employeeId];
+  } else {
+    return null; // Return null for unknown IDs
+  }
+}
+
+
+
+
+
 
 

@@ -44,8 +44,7 @@ const options = [
       'Add a role',
       'Add an employee',
       'Update an employee role',
-      'Exit'
-    ],
+      'Exit'],
   },
 ];
 
@@ -61,12 +60,15 @@ function init() {
           break;
         case 'View all roles':
           // Call function to view all roles
+          viewAllRoles();
           break;
         case 'View all employees':
           // Call function to view all employees
+          viewAllEmployee();
           break;
         case 'Add a department':
           // Call function to add a department
+          addDepartment();
           break;
         case 'Add a role':
           // Call function to add a role
@@ -107,8 +109,35 @@ function viewAllDepartments() {
     } else {
       console.table(results);
     }
+    init();
   });
-  init();
+}
+
+// Function to view all roles
+function viewAllRoles() {
+  console.log()
+  db.query('SELECT * FROM role', function (err, results) {
+    if (err) {
+      console.error('Error:', err);
+    } else {
+      console.table(results);
+    }
+    init();
+  });
+}
+
+// Function to view all employee
+function viewAllEmployee() {
+  console.log()
+  db.query('SELECT * FROM employee', function (err, results) {
+    if (err) {
+      console.error('Error:', err);
+    } else {
+      console.table(results);
+    }
+    init();
+  });
+
 }
 
 
@@ -131,19 +160,27 @@ function addDepartment() {
           if (err) {
             console.error('Error:', err);
           } else {
-            console.log(`${answers.departmentName} department added successfully.`);
+            console.log(`>${answers.departmentName}< department added successfully.`);
           }
+          promptToAddAnother();
+        }
+      );
+    })
+    .catch((err) => {
+      // Handle errors related to the entire function here
+      console.error('Error:', err);
+    });
 
-          // Ask if the user wants to add another department
-          inquirer
-            .prompt([
-              {
-                type: 'confirm',
-                name: 'addAnother',
-                message: 'Would you like to add another department?',
-              },
-            ])
-            .then((confirm) => {
+  function promptToAddAnother() {
+    inquirer
+      .prompt([
+        {
+          type: 'confirm',
+          name: 'addAnother',
+          message: 'Would you like to add another department?',
+        },
+      ])
+      .then((confirm) => {
         if (confirm.addAnother) {
           addDepartment(); // Call the addDepartment function again
         } else {
@@ -156,13 +193,13 @@ function addDepartment() {
   }
 }
 
-// Define a function to add a department
+// Define a function to add a role
 function addRole() {
   inquirer
     .prompt([
       {
         type: 'list',
-        name: 'depName',
+        name: 'depID',
         message: 'Choose the department to enter role:',
         choices: [{ name: 'Sales', value: 1 }, { name: 'Legal', value: 2 }, { name: 'Finance', value: 3 }, { name: 'Engineering', value: 4 }],
       },
@@ -181,12 +218,12 @@ function addRole() {
       // Insert the new role into the database
       db.query(
         'INSERT INTO role (department_id, title, salary) VALUES (?,?,?)',
-        [answers.depName, answers.title, answers.salary],
+        [answers.depID, answers.title, answers.salary],
         function (err, results) {
           if (err) {
             console.error('Error:', err);
           } else {
-            console.log(`${answers.title}added successfully.`);
+            console.log(`>${answers.title}< added successfully.`);
           }
 
           // Ask if the user wants to add another role
@@ -215,5 +252,8 @@ function addRole() {
       console.error('Error:', err);
     });
 }
+
+
+
 
 

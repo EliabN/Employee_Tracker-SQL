@@ -80,6 +80,7 @@ function init() {
           break;
         case 'Update an employee role':
           // Call function to update an employee role
+          updateEmployeeRole()
           break;
         case 'Exit':
           console.log('Exiting the application.');
@@ -254,7 +255,7 @@ function addRole() {
     });
 }
 
-// Define a function to add a employee
+// A function to add a employee
 function addEmployee() {
   inquirer
     .prompt([
@@ -321,5 +322,42 @@ function addEmployee() {
 }
 
 
+// Function to update an employee role
+function updateEmployeeRole() {
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'employeeID',
+        message: 'Choose the employee to update role',
+        choices: [{ name: 'John Doe', value: 1 }, { name: 'Mike Chan', value: 2 }, { name: 'Ashley Rodriguez', value: 3 }, { name: 'Kevin Tupik', value: 4 }, { name: 'Kunal Singh', value: 5 }, { name: 'Malia Brown', value: 6 }, { name: 'Sarah Lourd', value: 7 }, { name: 'Tom Allen', value: 8 }],
+      },
+      {
+        type: 'list',
+        name: 'roleID',
+        message: 'Choose the New role of the employee',
+        choices: [{ name: 'Sales Lead', value: 1 }, { name: 'Salesperson', value: 2 }, { name: 'Lead Engineer', value: 3 }, { name: 'Software Engineer', value: 4 }, { name: 'Account Manager', value: 5 }, { name: 'Accountant', value: 6 }, { name: 'Legal Team Lead', value: 7 }, { name: 'Lawyer', value: 8 }],
+      }
+    ])
+    .then((answers) => {
+      // Insert the new department into the database
+      db.query(
+        'UPDATE employee SET `role_id` = ? WHERE `id` = ?',
+        [answers.roleID, answers.employeeID],
+        function (err, results) {
+          if (err) {
+            console.error('Error:', err);
+          } else {
+            console.log(`Employee >${answers.}< updated successfully.`);
+          }
+          init()
+        }
+      );
+    })
+    .catch((err) => {
+      // Handle errors related to the entire function here
+      console.error('Error:', err);
+    });
+}
 
 

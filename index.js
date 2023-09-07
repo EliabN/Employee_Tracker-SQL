@@ -59,10 +59,6 @@ function init() {
           // Call function to view all departments
           viewAllDepartments();
           break;
-        case 'Add a department':
-          // Call function to add a department
-          addDepartment();
-          return;
         case 'View all roles':
           // Call function to view all roles
           break;
@@ -116,7 +112,6 @@ function viewAllDepartments() {
 }
 
 
-
 // Define a function to add a department
 function addDepartment() {
   inquirer
@@ -149,20 +144,16 @@ function addDepartment() {
               },
             ])
             .then((confirm) => {
-              // If Yes to add another department> call addDepartment, else> return to main menu
-              (confirm.addAnother) ? addDepartment() : init();
-            })
-            .catch((err) => {
-              // Handle prompt-related errors here
-              console.error('Error:', err);
-            });
+        if (confirm.addAnother) {
+          addDepartment(); // Call the addDepartment function again
+        } else {
+          init(); // Return to the main menu
         }
-      );
-    })
-    .catch((err) => {
-      // Handle errors related to the entire function here
-      console.error('Error:', err);
-    });
+      })
+      .catch((err) => {
+        console.error('Error:', err);
+      });
+  }
 }
 
 // Define a function to add a department

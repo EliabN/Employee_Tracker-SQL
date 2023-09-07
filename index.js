@@ -76,6 +76,7 @@ function init() {
           break;
         case 'Add an employee':
           // Call function to add an employee
+          addEmployee();
           break;
         case 'Update an employee role':
           // Call function to update an employee role
@@ -253,6 +254,71 @@ function addRole() {
     });
 }
 
+// Define a function to add a employee
+function addEmployee() {
+  inquirer
+    .prompt([
+      {
+        type: 'list',
+        name: 'roleID',
+        message: 'Choose the role of the employee',
+        choices: [{ name: 'Sales Lead', value: 1 }, { name: 'Salesperson', value: 2 }, { name: 'Lead Engineer', value: 3 }, { name: 'Software Engineer', value: 4 }, { name: 'Account Manager', value: 5 }, { name: 'Accountant', value: 6 }, { name: 'Legal Team Lead', value: 7 }, { name: 'Lawyer', value: 8 }],
+      },
+      {
+        type: 'input',
+        name: 'firstName',
+        message: 'Enter the first name of the employee:',
+      },
+      {
+        type: 'input',
+        name: 'lastName',
+        message: 'Enter the last name of the employee:',
+      },
+      {
+        type: 'list',
+        name: 'managerID',
+        message: 'Choose the manager of the rol/employee',
+        choices: [{ name: 'John Doe', value: 1 }, { name: 'Mike Chan', value: 2 }, { name: 'Ashley Rodriguez', value: 3 }, { name: 'Kevin Tupik', value: 4 }, { name: 'Kunal Singh', value: 5 }, { name: 'Malia Brown', value: 6 }, { name: 'Sarah Lourd', value: 7 }, { name: 'Tom Allen', value: 8 }],
+      }
+    ])
+    .then((answers) => {
+      // Insert the new employee into the database
+      db.query(
+        'INSERT INTO employee (role_id, first_name, last_name, manager_id) VALUES (?,?,?,?)',
+        [answers.roleID, answers.firstName, answers.lastName, answers.managerID],
+        function (err, results) {
+          if (err) {
+            console.error('Error:', err);
+          } else {
+            console.log(`>${answers.firstName}, ${answers.lastName}< added successfully.`);
+          }
+
+          // Ask if the user wants to add another employee
+          inquirer
+            .prompt([
+              {
+                type: 'confirm',
+                name: 'addAnother',
+                message: 'Would you like to add another employee?',
+              },
+            ])
+            .then((confirmation) => {
+              // If the user wants to add another role call addEmployee
+              // If not, return to the main menu
+              (confirmation.addAnother) ? addEmployee() : init();
+            })
+            .catch((err) => {
+              // Handle prompt-related errors here
+              console.error('Error:', err);
+            });
+        }
+      );
+    })
+    .catch((err) => {
+      // Handle errors related to the entire function here
+      console.error('Error:', err);
+    });
+}
 
 
 

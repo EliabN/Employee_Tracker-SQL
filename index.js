@@ -4,6 +4,7 @@ const mysql = require('mysql2');
 const { password, aSCII } = require('./sqlPassword');
 // Import and require inquirer (inquirer@8.2.4)
 const inquirer = require('inquirer');
+const { resolve } = require('path');
 
 
 // Create connection to database
@@ -144,7 +145,6 @@ function viewAllEmployee() {
 
 }
 
-
 // Define a function to add a department
 function addDepartment() {
   inquirer
@@ -200,7 +200,7 @@ function addDepartment() {
 // Function to add a role
 async function addRole() {
   // Fetch the list of departments from the database using the function
-  const departments = await getDepartmentsFromDatabase();
+  const departments = await getAllDepartmentsDatabase();
 
   // Use Inquirer to prompt the user for role information
   inquirer
@@ -210,7 +210,7 @@ async function addRole() {
         name: 'depId',
         message: 'Choose the department to enter the role:',
         // Set the choices to the fetched departments
-        choices: departments, 
+        choices: departments,
       },
       {
         type: 'input',
@@ -244,14 +244,18 @@ async function addRole() {
 }
 
 // A function to add a employee
-function addEmployee() {
+async function addEmployee() {
+  // Fetch the list of roles from the database using the function
+  const roles = await getAllRoleDatabase();
+
   inquirer
     .prompt([
       {
         type: 'list',
         name: 'roleID',
         message: 'Choose the role of the employee',
-        choices: [{ name: 'Sales Lead', value: 1 }, { name: 'Salesperson', value: 2 }, { name: 'Lead Engineer', value: 3 }, { name: 'Software Engineer', value: 4 }, { name: 'Account Manager', value: 5 }, { name: 'Accountant', value: 6 }, { name: 'Legal Team Lead', value: 7 }, { name: 'Lawyer', value: 8 }],
+        // Set the choices to the fetched roles
+        choices: roles,
       },
       {
         type: 'input',
@@ -309,87 +313,28 @@ function addEmployee() {
     });
 }
 
-// A function to add a employee
-function addEmployee() {
-  inquirer
-    .prompt([
-      {
-        type: 'list',
-        name: 'roleID',
-        message: 'Choose the role of the employee',
-        choices: [{ name: 'Sales Lead', value: 1 }, { name: 'Salesperson', value: 2 }, { name: 'Lead Engineer', value: 3 }, { name: 'Software Engineer', value: 4 }, { name: 'Account Manager', value: 5 }, { name: 'Accountant', value: 6 }, { name: 'Legal Team Lead', value: 7 }, { name: 'Lawyer', value: 8 }],
-      },
-      {
-        type: 'input',
-        name: 'firstName',
-        message: 'Enter the first name of the employee:',
-      },
-      {
-        type: 'input',
-        name: 'lastName',
-        message: 'Enter the last name of the employee:',
-      },
-      {
-        type: 'list',
-        name: 'managerID',
-        message: 'Choose the manager of the rol/employee',
-        choices: [{ name: 'John Doe', value: 1 }, { name: 'Mike Chan', value: 2 }, { name: 'Ashley Rodriguez', value: 3 }, { name: 'Kevin Tupik', value: 4 }, { name: 'Kunal Singh', value: 5 }, { name: 'Malia Brown', value: 6 }, { name: 'Sarah Lourd', value: 7 }, { name: 'Tom Allen', value: 8 }],
-      }
-    ])
-    .then((answers) => {
-      // Insert the new employee into the database
-      db.query(
-        'INSERT INTO employee (role_id, first_name, last_name, manager_id) VALUES (?,?,?,?)',
-        [answers.roleID, answers.firstName, answers.lastName, answers.managerID],
-        function (err, results) {
-          if (err) {
-            console.error('Error:', err);
-          } else {
-            console.log(`>${answers.firstName}, ${answers.lastName}< added successfully.`);
-          }
-
-          // Ask if the user wants to add another employee
-          inquirer
-            .prompt([
-              {
-                type: 'confirm',
-                name: 'addAnother',
-                message: 'Would you like to add another employee?',
-              },
-            ])
-            .then((confirmation) => {
-              // If the user wants to add another role call addEmployee
-              // If not, return to the main menu
-              (confirmation.addAnother) ? addEmployee() : init();
-            })
-            .catch((err) => {
-              // Handle prompt-related errors here
-              console.error('Error:', err);
-            });
-        }
-      );
-    })
-    .catch((err) => {
-      // Handle errors related to the entire function here
-      console.error('Error:', err);
-    });
-}
-
 // Function to update an employee role
-function updateEmployeeRole() {
+async function updateEmployeeRole() {
+  // Fetch the list of employees from the database using the function
+  const employees = await getAllEmployeesDatabase();
+  // Fetch the list of roles from the database using the function
+  const roles = await getAllRoleDatabase();
+
   inquirer
     .prompt([
       {
         type: 'list',
         name: 'employeeID',
         message: 'Choose the employee to update role',
-        choices: [{ name: 'John Doe', value: 1 }, { name: 'Mike Chan', value: 2 }, { name: 'Ashley Rodriguez', value: 3 }, { name: 'Kevin Tupik', value: 4 }, { name: 'Kunal Singh', value: 5 }, { name: 'Malia Brown', value: 6 }, { name: 'Sarah Lourd', value: 7 }, { name: 'Tom Allen', value: 8 }],
+        // Set the choices to the fetched employees
+        choices: employees,
       },
       {
         type: 'list',
         name: 'roleID',
         message: 'Choose the New role of the employee',
-        choices: [{ name: 'Sales Lead', value: 1 }, { name: 'Salesperson', value: 2 }, { name: 'Lead Engineer', value: 3 }, { name: 'Software Engineer', value: 4 }, { name: 'Account Manager', value: 5 }, { name: 'Accountant', value: 6 }, { name: 'Legal Team Lead', value: 7 }, { name: 'Lawyer', value: 8 }],
+        // Set the choices to the fetched roles
+        choices: roles,
       }
     ])
     .then((answers) => {
@@ -442,32 +387,8 @@ function getEmployeeNameById(employeeId) {
   }
 }
 
-
-function getAllDepartment() {
-  // Query to retrieve the list of departments
-  const query = 'SELECT * FROM department';
-
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error('Error executing the query:', err);
-      return;
-    }
-
-    // 'results' will contain the list of departments as an array of objects
-    const departments = results;
-
-    // Now you can use the 'departments' array in your application
-    console.log('List of departments:', departments[1].id, departments[1].dep_name);
-
-    // Don't forget to close the database connection when you're done
-    db.end();
-  });
-}
-
-
-
 // Function to retrieve departments from the database
-function getDepartmentsFromDatabase() {
+function getAllDepartmentsDatabase() {
   return new Promise((resolve, reject) => {
     // Query the database to retrieve all departments
     db.query('SELECT * FROM department', (err, results) => {
@@ -487,6 +408,47 @@ function getDepartmentsFromDatabase() {
   });
 }
 
+// Function to retrieve all roles from the database
+function getAllRoleDatabase() {
+  return new Promise((resolve, reject) => {
+    // Query the database to retrieve all departments
+    db.query('SELECT * FROM role', (err, results) => {
+      if (err) {
+        // If there's an error, reject the promise
+        reject(err);
+      } else {
+        // If successful, map the results to an array of choices
+        const roles = results.map((role) => ({
+          name: role.title,
+          value: role.id,
+        }));
+        // Resolve the promise with the array of departments
+        resolve(roles);
+      }
+    });
+  });
+}
+
+// Function to retrieve all employee form the database
+function getAllEmployeesDatabase() {
+  return new Promise((resolve, reject) => {
+    // Query the database to retrieve all employees
+    db.query('SELECT * FROM employee', (err, results) => {
+      if (err) {
+        // If no error reject promise
+        reject(err);
+      } else {
+        // If successful, map the results to an array of choices answer
+        const employees = results.map((employee) => ({
+          name: `${employee.first_name} ${employee.last_name}`,
+          value: employee.id,
+        }))
+        // Resolve the promise with the array of departments
+        resolve(employees);
+      }
+    })
+  })
+}
 
 
 

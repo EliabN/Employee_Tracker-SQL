@@ -4,7 +4,7 @@ const mysql = require('mysql2');
 const { password, aSCII } = require('./sqlPassword');
 // Import and require inquirer (inquirer@8.2.4)
 const inquirer = require('inquirer');
-const { resolve } = require('path');
+//const { resolve } = require('path');
 
 
 // Create connection to database
@@ -119,29 +119,51 @@ function viewAllDepartments() {
 // Function to view all roles
 function viewAllRoles() {
   console.log()
-  db.query('SELECT * FROM role JOIN department ON role.department_id = department.id;', function (err, results) {
-    if (err) {
-      console.error('Error:', err);
-    } else {
-      console.table(results);
-    }
-    init();
-  });
+  db.query(`SELECT role.id AS 'Role ID',
+            role.title AS 'Job Title',
+            department.dep_name AS 'Department',
+            role.salary AS 'Salary'
+            FROM role
+            JOIN department ON role.department_id = department.id;`,
+    function (err, results) {
+      if (err) {
+        console.error('Error:', err);
+      } else {
+        console.table(results);
+      }
+      init();
+    });
 }
 
 // Function to view all employee
 function viewAllEmployee() {
   console.log()
-  db.query('SELECT * FROM employee JOIN role ON employee.role_id = role.id;', function (err, results) {
-    if (err) {
-      console.error('Error:', err);
-    } else {
-      console.table(results);
-    }
-    init();
-  });
-
+  db.query(`SELECT
+            e.id AS 'Employee ID',
+            e.first_name AS 'First Name',
+            e.last_name AS 'Last Name',
+            r.title AS 'Job Title',
+            d.dep_name AS 'Department',
+            r.salary AS 'Salary',
+            CONCAT(m.first_name, ' ', m.last_name) AS 'Manager'
+            FROM
+            employee e
+            JOIN
+            role r ON e.role_id = r.id
+            JOIN
+            department d ON r.department_id = d.id
+            LEFT JOIN
+            employee m ON e.manager_id = m.id;`,
+    function (err, results) {
+      if (err) {
+        console.error('Error:', err);
+      } else {
+        console.table(results);
+      }
+      init();
+    });
 }
+
 
 // Define a function to add a department
 function addDepartment() {

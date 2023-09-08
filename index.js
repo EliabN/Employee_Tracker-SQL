@@ -197,15 +197,20 @@ function addDepartment() {
   }
 }
 
-// Define a function to add a role
-function addRole() {
+// Function to add a role
+async function addRole() {
+  // Fetch the list of departments from the database using the function
+  const departments = await getDepartmentsFromDatabase();
+
+  // Use Inquirer to prompt the user for role information
   inquirer
     .prompt([
       {
         type: 'list',
-        name: 'depID',
-        message: 'Choose the department to enter role:',
-        choices: [{ name: 'Sales', value: 1 }, { name: 'Legal', value: 2 }, { name: 'Finance', value: 3 }, { name: 'Engineering', value: 4 }],
+        name: 'depId',
+        message: 'Choose the department to enter the role:',
+        // Set the choices to the fetched departments
+        choices: departments, 
       },
       {
         type: 'input',
@@ -215,44 +220,25 @@ function addRole() {
       {
         type: 'input',
         name: 'salary',
-        message: 'Enter the name of the salary:',
+        message: 'Enter the salary for the role:',
       },
     ])
     .then((answers) => {
       // Insert the new role into the database
       db.query(
-        'INSERT INTO role (department_id, title, salary) VALUES (?,?,?)',
-        [answers.depID, answers.title, answers.salary],
-        function (err, results) {
+        'INSERT INTO role (department_id, title, salary) VALUES (?, ?, ?)',
+        [answers.depId, answers.title, answers.salary],
+        (err, results) => {
           if (err) {
             console.error('Error:', err);
           } else {
-            console.log(`> ${answers.title} < added successfully.`);
+            console.log(`Role "${answers.title}" added successfully.`);
           }
-
-          // Ask if the user wants to add another role
-          inquirer
-            .prompt([
-              {
-                type: 'confirm',
-                name: 'addAnother',
-                message: 'Would you like to add another role?',
-              },
-            ])
-            .then((confirmation) => {
-              // If the user wants to add another role call addRole
-              // If not, return to the main menu
-              (confirmation.addAnother) ? addRole() : init();
-            })
-            .catch((err) => {
-              // Handle prompt-related errors here
-              console.error('Error:', err);
-            });
+          init(); // Return to the main menu
         }
       );
     })
     .catch((err) => {
-      // Handle errors related to the entire function here
       console.error('Error:', err);
     });
 }
@@ -390,7 +376,6 @@ function addEmployee() {
     });
 }
 
-
 // Function to update an employee role
 function updateEmployeeRole() {
   inquirer
@@ -436,8 +421,6 @@ function updateEmployeeRole() {
     });
 }
 
-
-
 function getEmployeeNameById(employeeId) {
   // Define a mapping of employee IDs to names
   const employeeIdToName = {
@@ -455,9 +438,59 @@ function getEmployeeNameById(employeeId) {
   if (employeeIdToName.hasOwnProperty(employeeId)) {
     return employeeIdToName[employeeId];
   } else {
-    return null; // Return null for unknown IDs
+    // Return null for unknown IDs
+    return null;
   }
 }
+
+
+function getAllDepartment() {
+  // Query to retrieve the list of departments
+  const query = 'SELECT * FROM department';
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error executing the query:', err);
+      return;
+    }
+
+    // 'results' will contain the list of departments as an array of objects
+    const departments = results;
+
+    // Now you can use the 'departments' array in your application
+    console.log('List of departments:', departments[1].id, departments[1].dep_name);
+
+    // Don't forget to close the database connection when you're done
+    db.end();
+  });
+}
+
+
+
+// Function to retrieve departments from the database
+function getDepartmentsFromDatabase() {
+  return new Promise((resolve, reject) => {
+    // Query the database to retrieve all departments
+    db.query('SELECT * FROM department', (err, results) => {
+      if (err) {
+        // If there's an error, reject the promise
+        reject(err);
+      } else {
+        // If successful, map the results to an array of choices
+        const departments = results.map((department) => ({
+          name: department.dep_name,
+          value: department.id,
+        }));
+        // Resolve the promise with the array of departments
+        resolve(departments);
+      }
+    });
+  });
+}
+
+
+
+
 
 
 

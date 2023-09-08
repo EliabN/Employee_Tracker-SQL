@@ -103,8 +103,6 @@ function init() {
     });
 }
 
-
-
 // Function to view all departments
 function viewAllDepartments() {
   console.log()
@@ -367,28 +365,6 @@ async function updateEmployeeRole() {
       // Handle errors related to the entire function here
       console.error('Error:', err);
     });
-}
-
-function getEmployeeNameById(employeeId) {
-  // Define a mapping of employee IDs to names
-  const employeeIdToName = {
-    1: 'John Doe',
-    2: 'Mike Chan',
-    3: 'Ashley Rodriguez',
-    4: 'Kevin Tupik',
-    5: 'Kunal Singh',
-    6: 'Malia Brown',
-    7: 'Sarah Lourd',
-    8: 'Tom Allen',
-  };
-
-  // Check if the provided employeeId exists in the mapping
-  if (employeeIdToName.hasOwnProperty(employeeId)) {
-    return employeeIdToName[employeeId];
-  } else {
-    // Return null for unknown IDs
-    return null;
-  }
 }
 
 // Function to retrieve departments from the database

@@ -309,7 +309,6 @@ function addEmployee() {
     });
 }
 
-
 // A function to add a employee
 function addEmployee() {
   inquirer

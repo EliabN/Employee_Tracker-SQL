@@ -247,6 +247,10 @@ async function addRole() {
 async function addEmployee() {
   // Fetch the list of roles from the database using the function
   const roles = await getAllRoleDatabase();
+  // Fetch the list of employees from the database using the function
+  const employees = await getAllEmployeesDatabase();
+  // Add a no manager option
+  employees.unshift({ name: 'None', value: null })
 
   inquirer
     .prompt([
@@ -271,7 +275,8 @@ async function addEmployee() {
         type: 'list',
         name: 'managerID',
         message: 'Choose the manager of the rol/employee',
-        choices: [{ name: 'John Doe', value: 1 }, { name: 'Mike Chan', value: 2 }, { name: 'Ashley Rodriguez', value: 3 }, { name: 'Kevin Tupik', value: 4 }, { name: 'Kunal Singh', value: 5 }, { name: 'Malia Brown', value: 6 }, { name: 'Sarah Lourd', value: 7 }, { name: 'Tom Allen', value: 8 }],
+        // Set the choices to the fetched employees
+        choices: employees,
       }
     ])
     .then((answers) => {
@@ -326,7 +331,7 @@ async function updateEmployeeRole() {
         type: 'list',
         name: 'employeeID',
         message: 'Choose the employee to update role',
-        // Set the choices to the fetched employees
+        // Set the choices to from fetched employees
         choices: employees,
       },
       {
@@ -338,26 +343,25 @@ async function updateEmployeeRole() {
       }
     ])
     .then((answers) => {
-      const employeeName = getEmployeeNameById(answers.employeeID);
-
-      if (employeeName) {
-        // Update the employee's role in the database
-        db.query(
-          'UPDATE employee SET `role_id` = ? WHERE `id` = ?',
-          [answers.roleID, answers.employeeID],
-          function (err, results) {
-            if (err) {
-              console.error('Error:', err);
+      // Update the employee's role in the database
+      db.query(
+        'UPDATE employee SET `role_id` = ? WHERE `id` = ?',
+        [answers.roleID, answers.employeeID],
+        function (err, results) {
+          if (err) {
+            console.error('Error:', err);
+          } else {
+            // Check if the provided employeeId exists in the mapping
+            if (employees.hasOwnProperty(answers.employeeID)) {
+              console.log(`Employee ${employees[answers.employeeID - 1].name}'s role updated successfully.`);
             } else {
-              console.log(`Employee ${employeeName}'s role updated successfully.`);
+              // Return null for unknown IDs
+              return null;
             }
-            init();
           }
-        );
-      } else {
-        console.error('Invalid employee ID.');
-        init();
-      }
+          init();
+        }
+      );
     })
     .catch((err) => {
       // Handle errors related to the entire function here
